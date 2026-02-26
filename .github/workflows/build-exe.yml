@@ -17,27 +17,63 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install "nuitka[onefile]" PyQt6 PyMuPDF Pillow ordered-set
+        run: pip install PyQt6 PyMuPDF Pillow pyinstaller
 
-      - name: Build EXE with Nuitka
+      - name: Build with PyInstaller (directory mode)
         run: >
-          python -m nuitka
-          --standalone
-          --onefile
-          --assume-yes-for-downloads
-          --windows-console-mode=disable
-          --enable-plugin=pyqt6
-          --include-package=core
-          --include-package=ui
-          --output-filename=PDFTool.exe
-          --output-dir=dist
+          pyinstaller
+          --name PDFTool
+          --windowed
+          --noconfirm
+          --clean
+          --distpath dist
           main.py
 
+      - name: Create NSIS installer script
+        shell: pwsh
+        run: |
+          @"
+          !include "MUI2.nsh"
+
+          Name "PDF Tool"
+          OutFile "PDFTool-Setup.exe"
+          InstallDir "`$PROGRAMFILES\PDFTool"
+          RequestExecutionLevel admin
+
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_LANGUAGE "German"
+
+          Section "Install"
+            SetOutPath "`$INSTDIR"
+            File /r "dist\PDFTool\*.*"
+            CreateShortcut "`$DESKTOP\PDF Tool.lnk" "`$INSTDIR\PDFTool.exe"
+            CreateDirectory "`$SMPROGRAMS\PDF Tool"
+            CreateShortcut "`$SMPROGRAMS\PDF Tool\PDF Tool.lnk" "`$INSTDIR\PDFTool.exe"
+            CreateShortcut "`$SMPROGRAMS\PDF Tool\Deinstallieren.lnk" "`$INSTDIR\uninstall.exe"
+            WriteUninstaller "`$INSTDIR\uninstall.exe"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PDFTool" "DisplayName" "PDF Tool"
+            WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PDFTool" "UninstallString" "`$INSTDIR\uninstall.exe"
+          SectionEnd
+
+          Section "Uninstall"
+            RMDir /r "`$INSTDIR"
+            Delete "`$DESKTOP\PDF Tool.lnk"
+            RMDir /r "`$SMPROGRAMS\PDF Tool"
+            DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\PDFTool"
+          SectionEnd
+          "@ | Out-File -Encoding UTF8 installer.nsi
+
+      - name: Build NSIS installer
+        uses: joncloud/makensis-action@v4
+        with:
+          script-file: installer.nsi
+
       - name: Create password-protected ZIP
-        run: 7z a -p"pdftool2026" -tzip dist/PDFTool-Windows.zip dist/PDFTool.exe
+        run: 7z a -p"pdftool2026" -tzip PDFTool-Setup.zip PDFTool-Setup.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: PDFTool-Windows
-          path: dist/PDFTool-Windows.zip
+          path: PDFTool-Setup.zip
