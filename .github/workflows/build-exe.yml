@@ -17,13 +17,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install "nuitka[onefile]" PyQt6 PyMuPDF Pillow ordered-set
 
       - name: Build EXE with Nuitka
         run: >
           python -m nuitka
           --standalone
           --onefile
+          --assume-yes-for-downloads
           --windows-console-mode=disable
           --enable-plugin=pyqt6
           --include-package=core
