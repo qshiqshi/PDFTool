@@ -1,0 +1,31 @@
+PDF Tool - Build-Anleitung
+==========================
+
+OPTION 1: GitHub Actions (empfohlen - kein Windows noetig)
+----------------------------------------------------------
+1. Repository auf GitHub erstellen (z.B. "PDFTool")
+2. Code hochladen:
+   cd PDFTool
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/DEIN_USERNAME/PDFTool.git
+   git push -u origin main
+
+3. Auf GitHub -> Actions -> "Build Windows EXE" -> "Run workflow"
+4. Nach ca. 3-5 Minuten: Artifacts herunterladen -> PDFTool.exe
+
+OPTION 2: Auf einem Windows-Rechner bauen
+------------------------------------------
+1. Python 3.11+ installieren: https://python.org
+2. In den PDFTool-Ordner navigieren
+3. Terminal oeffnen und ausfuehren:
+   pip install -r requirements.txt
+   pyinstaller build.spec
+4. Die .exe liegt unter: dist/PDFTool.exe
+
+NUTZUNG
+-------
+- PDFTool.exe starten (kein Python noetig!)
+- PDF oeffnen ueber Datei -> Oeffnen oder den Button
+- Alle Features ueber Menue, Toolbar und Tabs erreichbar
