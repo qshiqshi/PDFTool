@@ -22,8 +22,11 @@ jobs:
       - name: Build EXE
         run: pyinstaller build.spec
 
+      - name: Create password-protected ZIP
+        run: 7z a -p"pdftool2026" -tzip dist/PDFTool-Windows.zip dist/PDFTool.exe
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: PDFTool-Windows
-          path: dist/PDFTool.exe
+          path: dist/PDFTool-Windows.zip
