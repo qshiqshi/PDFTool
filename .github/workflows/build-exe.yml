@@ -19,8 +19,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Build EXE
-        run: pyinstaller build.spec
+      - name: Build EXE with Nuitka
+        run: >
+          python -m nuitka
+          --standalone
+          --onefile
+          --windows-console-mode=disable
+          --enable-plugin=pyqt6
+          --include-package=core
+          --include-package=ui
+          --output-filename=PDFTool.exe
+          --output-dir=dist
+          main.py
 
       - name: Create password-protected ZIP
         run: 7z a -p"pdftool2026" -tzip dist/PDFTool-Windows.zip dist/PDFTool.exe
